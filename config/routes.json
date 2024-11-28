@@ -1,0 +1,13 @@
+[
+
+  {
+    "name": "home",
+    "path": "/",
+    "controller": "/xampp/htdocs/input/src/infraestrutura/web/controladores/arquivo/arquivo_controlador.php",
+    "methods": ["POST"]
+  }
+]
+
+
+
+

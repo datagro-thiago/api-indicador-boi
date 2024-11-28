@@ -1,0 +1,21 @@
+{
+    "name": "src/input",
+    "autoload": {
+        "psr-4": {
+            "Src\\Input\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Thiago de Jesus Vieira",
+            "email": "thiago.vieira@datagro.com"
+        }
+    ],
+    "require": {
+    "symfony/routing": "^6.0",  
+    "symfony/http-foundation": "^6.0",  
+    "symfony/dependency-injection": "^6.0",  
+    "symfony/http-kernel": "^6.0" 
+    }
+
+}
