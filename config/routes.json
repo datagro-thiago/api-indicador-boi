@@ -1,11 +1,13 @@
+
 [
 
   {
     "name": "home",
     "path": "/",
-    "controller": "/xampp/htdocs/input/src/infraestrutura/web/controladores/arquivo/arquivo_controlador.php",
+    "controller": "\\Src\\Input\\Infraestrutura\\Web\\Controladores\\ControladorArquivo::upload",
     "methods": ["POST"]
   }
+
 ]
 
 

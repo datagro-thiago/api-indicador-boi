@@ -2,129 +2,176 @@
 
 namespace Src\Dominio;
 
-class Arquivo {
-    private \DateTime $dataHora;
-    private string $idNegocio;
-    private \DateTime $dtNegocio;
-    private string $operacao;
-    private string $idDisp;
-    private string $aprovado;
-    private string $dtAprov;
-    private string $nome;
-    private string $anonimo;
-    private string $bonus;
-    private float $vBonus;
-    private string $raca;
-    private string $categoria;
-    private string $origem;
-    private string $destino;
-    private string $frete;
-    private string $funrural;
-    private string $nutricao;
-    private float $diasPagto;
-    private string $propriedade;
-    private float $quantidade;
-    private string $abate;
-    private \DateTime $dtAbate;
-    private string $abatedouro;
-    private float $valor;
-    private string $presomodo;
-    private string $pesopercent;
+use Src\Dominio\Enum\ModalidadeEnum;
+use Src\Dominio\Enum\OperacaoEnum;
 
-    public function __construct(
-        \DateTime $dataHora,
+class Arquivo {
+    private int $id;
+    private \DateTime $dataRecebimento;
+    private \DateTime $dataAprovacao;
+    private int $aprovado;
+    private string $agenteColaborador;
+    private string $idNegocio;
+    private \DateTime $dataNegocio;
+    private \DateTime $dataAbate;
+    private int $quantidade;
+    private OperacaoEnum $operacao;
+    private ModalidadeEnum $modalidade;
+    private array $bonus;
+    private float $vbonus;
+    private int $categoria;
+    private int $raca;
+    private int $nutricao;
+    private int $origem;
+    private int $destino;
+    private string $fazenda;
+    private string $planta;
+    private string $frete;
+    private int $funrural;
+    private int $diasPagto;
+    private float $valorBase;
+    private string $abatedouro;
+    private string $pesomodo;
+    private float $pesopercent;
+    private \DateTime $inserido;
+    private \DateTime $alterado;
+
+    protected function __construct(
+        \DateTime $dataRecebimento,
+        \DateTime $dataAprovacao,
+        int $aprovado,
+        string $agenteColaborador,
         string $idNegocio,
-        \DateTime $dtNegocio,
-        string $operacao,
-        string $idDisp,
-        string $aprovado,
-        string $dtAprov,
-        string $nome,
-        string $anonimo,
-        string $bonus,
-        float $vBonus,
-        string $raca,
-        string $categoria,
-        string $origem,
-        string $destino,
+        \DateTime $dataNegocio,
+        \DateTime $dataAbate,
+        int $quantidade,
+        OperacaoEnum $operacao,
+        ModalidadeEnum $modalidade,
+        array $bonus,
+        float $vbonus,
+        int $categoria,
+        int $raca,
+        int $nutricao,
+        int $origem,
+        int $destino,
+        string $fazenda,
+        string $planta,
         string $frete,
-        string $funrural,
-        string $nutricao,
-        float $diasPagto,
-        string $propriedade,
-        float $quantidade,
-        string $abate,
-        \DateTime $dtAbate,
+        int $funrural,
+        int $diasPagto,
+        float $valorBase,
         string $abatedouro,
-        float $valor,
-        string $presomodo,
-        string $pesopercent 
+        string $pesomodo,
+        float $pesopercent,
+
     ) {
-        $this->dataHora = $dataHora;
-        $this->idNegocio = $idNegocio;
-        $this->dtNegocio = $dtNegocio;
-        $this->operacao = $operacao;
-        $this->idDisp = $idDisp;
+        $this->id = 1;
+        $this->dataRecebimento = $dataRecebimento;
+        $this->dataAprovacao = $dataAprovacao;
         $this->aprovado = $aprovado;
-        $this->dtAprov = $dtAprov;
-        $this->nome = $nome;
-        $this->anonimo = $anonimo;
+        $this->agenteColaborador = $agenteColaborador;
+        $this->idNegocio = $idNegocio;
+        $this->dataNegocio = $dataNegocio;
+        $this->dataAbate = $dataAbate;
+        $this->quantidade = $quantidade;
+        $this->operacao = $operacao;
+        $this->modalidade = $modalidade;
         $this->bonus = $bonus;
-        $this->vBonus = $vBonus;
-        $this->raca = $raca;
+        $this->vbonus = $vbonus;
         $this->categoria = $categoria;
+        $this->raca = $raca;
+        $this->nutricao = $nutricao;
         $this->origem = $origem;
         $this->destino = $destino;
+        $this->fazenda = $fazenda;
+        $this->planta = $planta;
         $this->frete = $frete;
         $this->funrural = $funrural;
-        $this->nutricao = $nutricao;
         $this->diasPagto = $diasPagto;
-        $this->propriedade = $propriedade;
-        $this->quantidade = $quantidade;
-        $this->abate = $abate;
-        $this->dtAbate = $dtAbate;
+        $this->valorBase = $valorBase;
         $this->abatedouro = $abatedouro;
-        $this->valor = $valor;
-        $this->presomodo = $presomodo;
-        $this->pesopercent = $pesopercent; 
+        $this->pesomodo = $pesomodo;
+        $this->pesopercent = $pesopercent;
+        $this->inserido = new \DateTime();
+        $this->alterado = new \DateTime(); 
     }
 
-    public static function novo(object $object): Arquivo
-    {
-        return new Arquivo(
-            $object->dataHora ?? new \DateTime(), 
-            $object->idNegocio ?? "",
-            $object->dtNegocio ?? new \DateTime(),
-            $object->operacao ?? "",
-            $object->idDisp ?? "",
-            $object->aprovado ?? "",
-            $object->dtAprov ?? "",
-            $object->nome ?? "",
-            $object->anonimo ?? "",
-            $object->bonus ?? "",
-            $object->vBonus ?? 0.0,
-            $object->raca ?? "",
-            $object->categoria ?? "",
-            $object->origem ?? "",
-            $object->destino ?? "",
-            $object->frete ?? "",
-            $object->funrural ?? "",
-            $object->nutricao ?? "",
-            $object->diasPagto ?? 0.0,
-            $object->propriedade ?? "",
-            $object->quantidade ?? 0.0,
-            $object->abate ?? "",
-            $object->dtAbate ?? new \DateTime(),
-            $object->abatedouro ?? "",
-            $object->valor ?? 0.0,
-            $object->presomodo ?? "",
-            $object->pesopercent ?? ""
+    public static function novo(
+        \DateTime $dataRecebimento,
+        \DateTime $dataAprovacao,
+        int $aprovado,
+        string $agenteColaborador,
+        string $idNegocio,
+        \DateTime $dataNegocio,
+        \DateTime $dataAbate,
+        int $quantidade,
+        OperacaoEnum $operacao,
+        ModalidadeEnum $modalidade,
+        array $bonus,
+        float $vbonus,
+        int $categoria,
+        int $raca,
+        int $nutricao,
+        int $origem,
+        int $destino,
+        string $fazenda,
+        string $planta,
+        string $frete,
+        int $funrural,
+        int $diasPagto,
+        float $valorBase,
+        string $abatedouro,
+        string $pesomodo,
+        float $pesopercent
+    ): self {
+        return new self(
+            $dataRecebimento,
+            $dataAprovacao,
+            $aprovado,
+            $agenteColaborador,
+            $idNegocio,
+            $dataNegocio,
+            $dataAbate,
+            $quantidade,
+            $operacao,
+            $modalidade,
+            $bonus,
+            $vbonus,
+            $categoria,
+            $raca,
+            $nutricao,
+            $origem,
+            $destino,
+            $fazenda,
+            $planta,
+            $frete,
+            $funrural,
+            $diasPagto,
+            $valorBase,
+            $abatedouro,
+            $pesomodo,
+            $pesopercent
         );
     }
 
-    public function getDataHora(): \DateTime
+    public function getDataRecebimento(): \DateTime
     {
-        return $this->dataHora;
+        return $this->dataRecebimento;
+    }
+    public function getDataAbate(): \DateTime {
+        return $this->dataAbate;
+    }
+
+    public function getQuantidade(): string {
+        return $this->quantidade;
+    }
+
+    public function getFazenda(): string {
+        return $this->fazenda;
+    }
+
+    public function getPlanta(): string {
+        return $this->planta;
     }
 
     public function getIdNegocio(): string
@@ -132,67 +179,64 @@ class Arquivo {
         return $this->idNegocio;
     }
 
-    public function getDtNegocio(): \DateTime
+    public function getDataNegocio(): \DateTime
     {
-        return $this->dtNegocio;
+        return $this->dataNegocio;
     }
 
-    public function getOperacao(): string
+    public function getOperacao(): OperacaoEnum
     {
         return $this->operacao;
     }
 
-    public function getIdDisp(): string
+    public function getModalidade(): ModalidadeEnum
     {
-        return $this->idDisp;
+        return $this->modalidade;
+    }
+    public function getDataAprovacao(): \DateTime {
+        return $this->dataAprovacao;
     }
 
-    public function getAprovado(): string
+    public function getAprovado(): int
     {
         return $this->aprovado;
     }
 
-    public function getDtAprov(): string
+    public function getAgenteColaborador(): string
     {
-        return $this->dtAprov;
+        return $this->agenteColaborador;
     }
-
-    public function getNome(): string
-    {
-        return $this->nome;
-    }
-
-    public function getAnonimo(): string
-    {
-        return $this->anonimo;
-    }
-
-    public function getBonus(): string
+    public function getBonus(): array
     {
         return $this->bonus;
     }
 
     public function getVBonus(): float
     {
-        return $this->vBonus;
+        return $this->vbonus;
     }
 
-    public function getRaca(): string
-    {
-        return $this->raca;
-    }
-
-    public function getCategoria(): string
+    public function getCategoria(): int
     {
         return $this->categoria;
     }
 
-    public function getOrigem(): string
+    public function getRaca(): int
+    {
+        return $this->raca;
+    }
+
+    public function getNutricao(): int
+    {
+        return $this->nutricao;
+    }
+
+    public function getOrigem(): int
     {
         return $this->origem;
     }
 
-    public function getDestino(): string
+    public function getDestino(): int
     {
         return $this->destino;
     }
@@ -202,39 +246,19 @@ class Arquivo {
         return $this->frete;
     }
 
-    public function getFunrural(): string
+    public function getFunrural(): int
     {
         return $this->funrural;
     }
 
-    public function getNutricao(): string
-    {
-        return $this->nutricao;
-    }
-
-    public function getDiasPagto(): float
+    public function getDiasPagto(): int
     {
         return $this->diasPagto;
     }
 
-    public function getPropriedade(): string
+    public function getValorBase(): float
     {
-        return $this->propriedade;
-    }
-
-    public function getQuantidade(): float
-    {
-        return $this->quantidade;
-    }
-
-    public function getAbate(): string
-    {
-        return $this->abate;
-    }
-
-    public function getDtAbate(): \DateTime
-    {
-        return $this->dtAbate;
+        return $this->valorBase;
     }
 
     public function getAbatedouro(): string
@@ -242,20 +266,13 @@ class Arquivo {
         return $this->abatedouro;
     }
 
-    public function getValor(): float
+    public function getPesomodo(): string
     {
-        return $this->valor;
+        return $this->pesomodo;
     }
 
-    public function getPresomodo(): string
-    {
-        return $this->presomodo;
-    }
-
-    public function getPesoPercent(): string
+    public function getPesoPercent(): float
     {
         return $this->pesopercent;
     }
-
-
 }
