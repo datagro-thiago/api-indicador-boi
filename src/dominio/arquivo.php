@@ -40,7 +40,7 @@ class Arquivo {
         \DateTime $dataRecebimento,
         \DateTime $dataAprovacao,
         int $aprovado,
-        string $agenteColaborador,
+        string $agenteColaborador, //ALTERAR 
         string $idNegocio,
         \DateTime $dataNegocio,
         \DateTime $dataAbate,

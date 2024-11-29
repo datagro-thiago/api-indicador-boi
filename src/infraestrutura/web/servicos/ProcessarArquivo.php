@@ -18,7 +18,7 @@ class ProcessarArquivo{
                 new \DateTime($value["dataRecebimento"]),
                 new \DateTime($value["dataAprovacao"]),
                 (int) $value["aprovado"],
-                $value["agenteColaborador"],
+                $value["fonte"], //IMPLEMENTAR ENUM E VALIDAR
                 $value["idNegocio"],
                 new \DateTime($value["dataNegocio"]),
                 new \DateTime($value["dataAbate"]),
