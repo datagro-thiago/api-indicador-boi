@@ -2,10 +2,10 @@
 [
 
   {
-    "name": "home",
-    "path": "/",
-    "controller": "\\Src\\Input\\Infraestrutura\\Web\\Controladores\\ControladorArquivo::upload",
-    "methods": ["POST"]
+    "nome": "home",
+    "pacote": "/",
+    "controlador": "\\Src\\Infraestrutura\\Web\\Controladores\\ControladorNegocio::upload",
+    "metodos": ["POST"]
   }
 
 ]

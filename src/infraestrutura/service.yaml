@@ -1,8 +1,0 @@
-services:
-    Src\Input\Infraestrutura\Web\Rotas\Input:
-        arguments:
-            $routesPath: '%kernel.project_dir%/input/config/routes.json'
-            $context: '@router.request_context'
-            $matcher: '@router'
-            $controllerResolver: '@controller_resolver'
-            $argumentResolver: '@argument_resolver'

@@ -1,0 +1,19 @@
+POST:
+array (
+  'remetente' => 'NaturaFrig',
+  'nomeEmpresa' => 'Beto',
+  'email' => 'teste@teste.com',
+  'senha' => '1',
+)
+FILES:
+array (
+  'arquivo' => 
+  array (
+    'name' => 'output.json',
+    'full_path' => 'output.json',
+    'type' => 'application/json',
+    'tmp_name' => '/tmp/php3or6Oq',
+    'error' => 0,
+    'size' => 1647,
+  ),
+)

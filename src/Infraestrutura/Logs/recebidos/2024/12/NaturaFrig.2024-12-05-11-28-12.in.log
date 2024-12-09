@@ -1,0 +1,16 @@
+POST:
+array (
+  'remetente' => 'NaturaFrig',
+)
+FILES:
+array (
+  'arquivo' => 
+  array (
+    'name' => 'BarraMansa1.2024-12-02-16-00-24.recv.json',
+    'full_path' => 'BarraMansa1.2024-12-02-16-00-24.recv.json',
+    'type' => 'application/json',
+    'tmp_name' => '/tmp/phpgc7QwH',
+    'error' => 0,
+    'size' => 594,
+  ),
+)

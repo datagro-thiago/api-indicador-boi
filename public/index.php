@@ -1,10 +1,13 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT']. '/negocios-input/vendor/autoload.php';
 
-use Src\Input\Infraestrutura\Web\Rotas\Input;
 
-include $_SERVER ['DOCUMENT_ROOT'] . "/input/src/infraestrutura/web/rotas/" . "Input.php";
+use Src\Infraestrutura\Web\Config\Input;
 
-require_once $_SERVER['DOCUMENT_ROOT']. '/input/vendor/autoload.php';
+// include $_SERVER ['DOCUMENT_ROOT'] . "/input/src/infraestrutura/web/rotas/" . "Input.php";
+
+$dotenv = Dotenv\Dotenv::createUnsafeImmutable($_SERVER['DOCUMENT_ROOT']. '/negocios-input');
+$dotenv->load();
 
 
 
