@@ -2,57 +2,107 @@
 
 namespace Src\Infraestrutura\Web\Servicos\Negocio\Handler;
 
-define ('CAMINHO_LOGS', $_SERVER['DOCUMENT_ROOT'] . '/negocios-input/src/Infraestrutura/Logs');
+use Src\Aplicacao\Negocio\Comando\ComandoBuscar;
+use Src\Infraestrutura\Web\Servicos\Arquivo\ServicoArquivo;
 
-use Src\Aplicacao\Arquivo\Arquivo;
+define('CAMINHO_LOGS', $_SERVER['DOCUMENT_ROOT'] . '/negocios-input/src/Infraestrutura/Logs');
+
 use Src\Aplicacao\Negocio\Comando\ComandoProcessar;
 use Src\Infraestrutura\Web\Servicos\Negocio\ProcessarNegocio;
 
 //Manipular Negocios e diretorios
-class ProcessarNegocioHandler{
+class ProcessarNegocioHandler
+{
 
     private ProcessarNegocio $processarNegocio;
-    public function __construct(){
+    public function __construct()
+    {
         $this->processarNegocio = new ProcessarNegocio();
     }
 
-    public function handler(ComandoProcessar $comandoProcessar): array { 
-        $job = date ("Y-m-d-H-i-s");
-        $retorno = [];
+    public function processarNegocio(ComandoProcessar $comandoProcessar): array
+    {
+        $job = date("Y-m-d-H-i-s");
         $status = 1;
         $mensagem = "Sucesso ao processar arquivo.";
+        $retorno = [];
 
         //salvar e recuperar endereco do Negocio
-        $enderecoNegocio = Arquivo::salvarArquivoLocalmente(
+        $lote = ServicoArquivo::salvarArquivoLocalmente(
             CAMINHO_LOGS,
             $comandoProcessar->getNome(),
             $comandoProcessar->getCaminhoNegocio(),
-            $comandoProcessar->getRemetente()
+            $comandoProcessar->getRemetente(),
+            $job
         );
-        
-        if ($enderecoNegocio["status"] == 0) {
+
+        if ($lote["status"] == 0) {
             $status = 0;
-            $mensagem = $enderecoNegocio["mensagem"];
+            $mensagem = $lote["mensagem"];
 
             return $retorno;
         }
-        
+
         try {
-            $processarNegocio = $this->processarNegocio->processar($enderecoNegocio["caminhoArquivo"], $comandoProcessar->getRemetente(), $job, CAMINHO_LOGS);
+            $processarNegocio = $this->processarNegocio->processar(
+                $lote["caminhoArquivo"],
+                $comandoProcessar->getRemetente(),
+                $job,
+                CAMINHO_LOGS,
+                $lote["idLote"],
+            );
 
             if ($processarNegocio["status"] == 0) {
-                $status  = 0;
-                $mensagem = "Erro no processamento.";
+                $status = 0;
+                $mensagem = $processarNegocio["mensagem"];
             }
 
             return [
-                "status"=> $status,
+                "status" => $status,
                 "mensagem" => $mensagem,
-                "rastreio" => $processarNegocio["rastreio"]
+                "rastreio" => $processarNegocio["rastreio"],
             ];
+
         } catch (\Exception $e) {
             $retorno["mensagem"] = "Erro inesperado: " . $e->getMessage();
+            $retorno["status"] = 0;
             return $retorno;
-        } 
+        }
+
+    }
+
+    public function buscarNegocio(ComandoBuscar $comandoBuscar): array
+    {
+        $retorno = [];
+        try {
+            $negocio = $this->processarNegocio->buscarNegocio(
+                $comandoBuscar->getId(),
+                $comandoBuscar->getSenha()
+            );
+
+            if ($negocio["status"] === 0) {
+                $retorno = [
+                    "status" => 0,
+                    "mensagem" => $negocio["mensagem"],
+                ];
+
+            } else {
+                $retorno = [
+                    "status" => 1,
+                    "negocio" => $negocio["negocio"],
+                ];
+
+            }
+
+            return $retorno;
+
+        } catch (\Exception $e) {
+            $retorno = [
+                "status" => 0,
+                "mensagem" => "Erro inesperado: " . $e->getMessage(),
+            ];
+
+            return $retorno;
+        }
     }
 }

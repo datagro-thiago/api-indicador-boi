@@ -8,7 +8,6 @@ class ComandoValidar {
     private string $email;
     private string $senha;
     
-
     public function __construct(
         string $nomeEmpresa,
         string $email,

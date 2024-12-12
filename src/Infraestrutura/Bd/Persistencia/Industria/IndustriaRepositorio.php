@@ -20,7 +20,7 @@ class IndustriaRepositorio implements IndustriaGateway{
 
         $resultado = [];
         $itemParaPesquisa = "%" . $industria->getNome() . "%";
-        var_dump($itemParaPesquisa);
+
         $q = "SELECT * FROM " . $industria->getNomeTabela()  ." WHERE nome LIKE ?;";
 
         $result = $this->con->conn()->execute_query($q, [
@@ -55,4 +55,6 @@ class IndustriaRepositorio implements IndustriaGateway{
 
         return $industrias;
     }
+
+    
 }

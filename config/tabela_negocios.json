@@ -26,7 +26,9 @@
         "pesomodo",
         "pesopercent",
         "inserido",
-        "alterado"
-
+        "alterado",
+        "linha",
+        "arquivo",
+        "senha"
     ]
 }

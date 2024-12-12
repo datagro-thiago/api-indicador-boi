@@ -4,8 +4,7 @@ namespace Src\Infraestrutura\Web\Servicos\Negocio;
 
 use DateTime;
 use Exception;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Shuchkin\SimpleXLSX;
 use Src\Dominio\Bucket\Bucket;
 use Src\Dominio\Negocio\Enum\FonteEnum;
 use Src\Dominio\Negocio\Enum\FreteEnum;
@@ -13,114 +12,171 @@ use Src\Dominio\Negocio\Enum\ModalidadeEnum;
 use Src\Dominio\Negocio\Enum\OperacaoEnum;
 use Src\Dominio\Negocio\Negocio;
 
+use Src\Infraestrutura\Bd\Persistencia\Arquivo\ArquivoRepositorio;
 use Src\Infraestrutura\Bd\Persistencia\Negocio\NegocioRepositorio;
 
-use Src\Infraestrutura\Web\Servicos\Categoria\BuscarCategoria;
+use Src\Infraestrutura\Web\Servicos\Arquivo\ServicoArquivo;
 use Src\Infraestrutura\Web\Servicos\Bucket\S3;
-use Src\Infraestrutura\Web\Servicos\Industria\BuscarIndustria;
-use Src\Infraestrutura\Web\Servicos\Municipio\BuscarMunicipio;
+use Src\Infraestrutura\Web\Servicos\Categoria\ServicoCategoria;
+use Src\Infraestrutura\Web\Servicos\Industria\ServicoIndustria;
+use Src\Infraestrutura\Web\Servicos\Municipio\ServicoMunicipio;
+use Src\Infraestrutura\Web\Servicos\Planta\ServicoPlanta;
+use Src\Infraestrutura\Web\Servicos\Raca\ServicoRaca;
 use Symfony\Component\Console\Exception\RuntimeException;
 
+//AQUI SE ENCONTRA O CORACAO DA APLICACAO
 class ProcessarNegocio
 {
     private NegocioRepositorio $negocioRepositorio;
-    private BuscarIndustria $buscarIndustria;
+    // private ServicoIndustria $buscarIndustria;
+    private ServicoArquivo $servicoArquivo;
 
     public function __construct()
     {
         $this->negocioRepositorio = new NegocioRepositorio();
-        $this->buscarIndustria = new BuscarIndustria();
+        // $this->buscarIndustria = new ServicoIndustria();
+        $this->servicoArquivo = new ServicoArquivo();
     }
+    public function processar(
+        string $lote,
+        string $remetente,
+        string $job,
+        string $caminhoLogs,
+        string $arquivo
+    ): array {
 
-    public function processar(string $caminhoNegocio, string $remetente, string $job, string $caminhoLogs): array
-    {
         $fonte = "AC";
         $negocios = array();
-        $base = basename($caminhoNegocio);
+        $base = basename($lote);
         $tipoArquivo = strtoupper(pathinfo($base, PATHINFO_EXTENSION));
+        $idIndustria = 1;
 
-        $idIndustria = $this->buscarIndustria->buscarIndustria($remetente);
+        $categoriaCache = [];
+        $municipioCache = [];
+        $racaCache = [];
+        $plantaCache = [];
+        $idArquivo = "";
+
+
         if ($idIndustria != 0) {
             $fonte = "I";
         }
-        $dados = $this->prepararArquivo($tipoArquivo, $caminhoNegocio);
-        $agora = new \DateTime();
-        $categoriaCache = [];
-        $municipioCache = [];
+        
+        $dados = $this->servicoArquivo->prepararArquivo($tipoArquivo, $lote, $base);
 
         foreach ($dados as $chave => $valor) {
             $chaveMaiuscula = strtoupper($chave);
 
-            if ($chaveMaiuscula === "NEGOCIOS") {
-                // Processa 'NEGS'
-                foreach ($valor as $negocio) {
+            if ($chaveMaiuscula === "ERRO") {
+                return $negocios[] = $valor;
+            }
 
-                    $categoria = $negocio["categoria"] ?? "";
-                    if (!isset($categoriaCache[$categoria])) {
-                        $categoriaCache[$categoria] = BuscarCategoria::buscarCategoria($categoria);
+            if ($chaveMaiuscula === "NEGOCIOS") {
+                // Processa 'NEGOCIOS'
+                foreach ($valor as $negocio) {
+                    $idArquivo = isset($negocio["arquivo"]) ? ($negocio["arquivo"]) : "";
+
+                    $planta = isset($negocio["planta"]) ? $negocio["planta"] : "";
+                    if (!isset($plantaCache[$planta])) {
+                        $id = ServicoPlanta::buscarPlanta($planta);
+                        $plantaCache [$planta]= $id;
                     }
-                
+
+                    $raca = isset($negocio["raca"]) ? $negocio["raca"] : ""; 
+                    if (!isset($racaCache[$raca])) { // Verificação de cache
+                        $id = ServicoRaca::buscarRaca($raca);
+                        $racaCache[$raca] = $id;
+                    }
+
+                    $categoria = isset($negocio["categoria"]) ? $negocio["categoria"] : ""; 
+                    if (!isset($categoriaCache[$categoria])) { // Verificação de cache
+                        $id = ServicoCategoria::buscarCategoria($categoria);
+                        $categoriaCache[$categoria] = $id;
+                    }
+
                     $origem = $negocio["origem"] ?? 0;
                     $destino = $negocio["destino"] ?? 0;
-    
+
                     if (!isset($municipioCache[$origem])) {
-                        $municipioCache[$origem] = BuscarMunicipio::buscarMunicipio($origem);
-                        
+                        $municipioCache[$origem] = ServicoMunicipio::buscarMunicipio($origem);
                     }
+
                     if (!isset($municipioCache[$destino])) {
-                        $municipioCache[$destino] = BuscarMunicipio::buscarMunicipio($destino);
+                        $municipioCache[$destino] = ServicoMunicipio::buscarMunicipio($destino);
                     }
 
                     $negocio = Negocio::novo(
-                        $agora,
+                        new DateTime(),
                         $negocio["dataAprovacao"] ?? null,
                         null,
                         FonteEnum::isValid($fonte),
                         1,
                         $negocio["idNegocio"] ?? null,
-                        new \DateTime(),
+                        new DateTime(),
                         isset($negocio["dtAbate"]) ? $negocio["dtAbate"] : "",
                         (int) ($negocio["quantidade"] ?? 0),
                         isset($negocio["operacao"]) ? OperacaoEnum::isValid($negocio["operacao"]) : "C",
                         isset($negocio["modalidade"]) ? ModalidadeEnum::isValid($negocio["modalidade"]) : "O",
-                        "{" . ($negocio["bonus"] ?? null) . "," . ($negocio["vbonus"] ?? null) . "}",
+                        "{ Bonus: " . ($negocio["bonus"] ?? null) . ", " . "vBonus: " . ($negocio["vbonus"] ?? null) . "}",
                         $categoriaCache[$categoria],
-                        (int) ($negocio["raca"] ?? 0),
-                        (int) ($negocio["nutricao"] ?? 0),
+                        $racaCache[$raca],
+                        isset($negocio["nutricao"]) ? $negocio["nutricao"] : "",
                         $municipioCache[$origem],
                         $municipioCache[$destino],
-                        isset($negocio["planta"]) ? 1 : 1,
+                        $plantaCache [$planta],
                         isset($negocio["frete"]) ? FreteEnum::isValid($negocio["frete"]) : "",
                         isset($negocio["funrural"]) ? ($negocio["funrural"]) : "",
                         isset($negocio["diasPagto"]) ? (int) ($negocio["diasPagto"]) : 0,
                         isset($negocio["valor"]) ? (float) ($negocio["valor"]) : 0,
                         isset($negocio["pesomodo"]) ? $negocio["pesomodo"] : null,
                         isset($negocio["pesopercent"]) ? (float) ($negocio["pesopercent"]) : 0,
+                        isset($negocio["linha"]) ? (int) ($negocio["linha"]) : null,
+                        $idArquivo,
                     );
 
                     array_push($negocios, $negocio);
                 }
+
+                $loteInfo["lote"] = [
+                    "arquivo" => $arquivo,
+                    "id" => $negocio->getArquivo(),
+                    "data" => date("d-m-Y H:i:s"),
+                    "negociosProcessados" => count($negocios)
+                ];
+
+                $processamento = $this->processarTudo(
+                    $negocios,
+                    $remetente,
+                    $job,
+                    $caminhoLogs,
+                    $loteInfo,
+                    $lote,
+                );
             }
         }
 
-        $processamento = $this->processarTudo($negocios, $remetente, $job, $caminhoLogs);
-
         return $negocios[] = $processamento;
     }
-
     //recebi todos os dados, agora vou processar, gerar log, csv e subir no bucket
-    public function processarTudo(array $negocios, string $remetente, string $job, string $caminhoLogs): array
-    {
+    public function processarTudo(
+        array $negocios,
+        string $remetente,
+        string $job,
+        string $caminhoLogs,
+        array $loteInfo,
+        string $lote
+    ): array {
         $rastreio = array();
         $status = 1;
         $mensagem = array();
+
         try {
             $log = $this->gerarESalvarLog($caminhoLogs, $job, $remetente);
 
-            $negociosProcessados = [];
             $caminhoCsv = "";
             $persistiu = $this->persistirNegocio($negocios);
             array_push($rastreio, $persistiu["id"]);
+            array_push($rastreio, $loteInfo);
 
             if ($persistiu["status"] == 0) {
                 $status = 0;
@@ -131,29 +187,30 @@ class ProcessarNegocio
                 $csv = $this->gerarCsv($negocio, $remetente, $job);
 
                 $caminhoCsv = $csv["csv"];
-                $negociosProcessados[] = [
-                    "csv" => $csv["csv"],
-                ];
             }
 
-            $negociosProcessados[] = [
-                "totalNegocios" => count($negocios),
-            ];
 
             $enviarCsvBucket = $this->enviarArquivoBucket("csv", $csv["csv"]);
-            $enviarLogBucket = $this->enviarArquivoBucket("log",  $log);
+            $enviarLogBucket = $this->enviarArquivoBucket("log", $log);
+            $enviarArquivoOriginalBucket = $this->enviarArquivoBucket((function () use ($lote): string {
+                if (strtoupper(pathinfo($lote, PATHINFO_EXTENSION)) === strtoupper("json")) {
+                    return "original/json";
+                } else {
+                    return "original/xls";
+                }
+            })(), $lote);
 
-            if (!$enviarCsvBucket || !$enviarLogBucket) {
+            if (!$enviarCsvBucket || !$enviarLogBucket || !$enviarArquivoOriginalBucket) {
                 $status = 0;
                 array_push($mensagem, "Erro ao enviar arquivos para o bucket.");
             } else {
                 unlink($caminhoCsv);
                 unlink($log);
+                unlink($lote);
             }
 
             return [
                 "log" => $log,
-                "negociosProcessados" => $negociosProcessados,
                 "rastreio" => $rastreio,
                 "mensagem" => $mensagem,
                 "status" => $status
@@ -197,7 +254,6 @@ class ProcessarNegocio
         $camposCsv = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/negocios-input/config/negocio_csv.json"), true);
 
         $dir = $_SERVER['DOCUMENT_ROOT'] . "/negocios-input/src/Infraestrutura/Logs/csv";
-
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
@@ -214,7 +270,7 @@ class ProcessarNegocio
 
         if (ftell($fp) == 0) {
             $colunasString = "";
-            foreach ((array)$camposCsv["csv"] as $coluna) {
+            foreach ((array) $camposCsv["csv"] as $coluna) {
                 $colunasString .= '"' . $coluna . '",';
             }
             $colunasString = rtrim($colunasString, ",");
@@ -244,6 +300,7 @@ class ProcessarNegocio
         $result['csv'] = $arq;
         $result['status'] = "sucesso";
         $result['mensagem'] = "CSV gerado e salvo com sucesso.";
+
         return $result;
     }
 
@@ -268,7 +325,7 @@ class ProcessarNegocio
 
     public function persistirNegocio(array $negocios): array
     {
-        
+
         $ok = $this->negocioRepositorio->salvar($negocios);
         return [
             "id" => $ok["id"],
@@ -276,117 +333,19 @@ class ProcessarNegocio
         ];
     }
 
-    public function prepararArquivo(string $tipo, string $arquivo)
+    public function buscarNegocio(string $id, string $senha): array
     {
-        if ($tipo === "JSON") {
-            $dados = json_decode(file_get_contents($arquivo), true, 512, JSON_THROW_ON_ERROR);
-            return $dados ?: [];
+        $retorno = [];
+        $validar = $this->negocioRepositorio->buscarSenha($senha);
+
+        if ($validar) {
+            $negocio = $this->negocioRepositorio->buscar($id);
+
+            $retorno = ["status" => 1, "negocio" => $negocio];
+        } else {
+            $retorno = ["status" => 0, "mensagem" => "Acesso negado!"];
         }
-    
-        if ($tipo === "XLS" || $tipo === "XLSX") {
-            if (!file_exists($arquivo)) {
-                throw new RuntimeException("Arquivo não encontrado: $arquivo");
-            }
-    
-            $arquivoXls = IOFactory::load($arquivo);
-            $planilha = $arquivoXls->getActiveSheet();
-            
-            $mapaColunas = [
-                'codigo' => 'idNegocio',
-                'Data Abate' => 'dtAbate',
-                'Qtd. Produto' => 'quantidade',
-                'Negociação' => 'operacao',
-                'Mercado' => 'modalidade',
-                'Valor' => 'valor',
-                'Prazo Pagamento (Dias)' => 'diasPagto',
-                'Raça' => 'raca',
-                'Estado (Fazenda)' => 'origem',
-                'Cidade (Fazenda)' => 'destino',
-                'Cód. Empresa' => 'idIndustria',
-                'Descrição Produto' => 'categoria',
-                'Orgânico' => 'nutricao',
-                'Valor Frete (Estimativa)' => 'frete',
-                'Valor Premiação Cobertura' => 'bonus',
-                'Valor Premiação Angus' => 'vbonus',
-            ];
-    
-            $dados = [];
-            $headers = [];
-            $l= 0;
-            $v = 0;
-            $contLinha = $planilha->getHighestRow();
-            $contColuna = $planilha->getHighestColumn();
-            $array = $planilha->rangeToArray("A1:{$contColuna}{$contLinha}", null);
-            
-            foreach ($array as $index => $linha){
-                $linhaDados = [];
-                //checar por linhas vazias
-                if(count(array_filter($linha, function($valor) {
-                    return $valor !== null;
-                })) == 0 ) {
-                    continue;
-                }
 
-                if($index === 0) {
-                    $headers[$index] = $linha;     
-                } else {
-                    $header = $headers[$index] ?? null;
-
-                    if($header && isset($mapaColunas[$header])) {
-                        $linhaDados[$mapaColunas[$header]] = $linha;
-                    }
-                }
-
-                if ($index > 1) {
-                    $dados[] = $linhaDados;
-                }
-
-            }
-
-            
-            var_dump($headers);
-
-
-            
-            
-            
-            
-            // // Processar linha por linha
-            // foreach ($planilha->getRowIterator() as $linhaIndex => $linha) {
-            //     $cellIterator = $linha->getCellIterator();  
-            //     $cellIterator->setIterateOnlyExistingCells(true);
-            //     $l++;
-            //     $linhaDados = [];
-            //     $linhaVazia = true; // Assumimo que a linha está vazia até que tenha valores
-            //     foreach ($cellIterator as $colunaIndex => $cell) {
-            //         $valor = $cell->getValue();
-            //         $v++;
-            //         if ($linhaIndex === 1) { // Capturar cabeçalhos
-            //             $headers[$colunaIndex] = trim((string)$valor); // Remover espaços
-            //         } else { // Processar dados
-            //             $header = $headers[$colunaIndex] ?? null;
-                        
-            //             if ($header && isset($mapaColunas[$header])) {
-            //                 $linhaDados[$mapaColunas[$header]] = trim((string)$valor); // Remover espaços
-            //                 if ($valor !== null && $valor !== '') {
-            //                     $linhaVazia = false; // Marcar como não vazia se algum valor for encontrado
-            //                 }
-            //             }
-            //         }
-            //     }
-                
-            //     // Adicionar apenas linhas com dados válidos
-            //     if ($linhaIndex > 1 && !$linhaVazia) {
-            //         $dados[] = $linhaDados;
-            //     }
-            // }
-            var_dump("Primeira iteracao: " . $l . " Segunda iteracao: " . $v);
-    
-            return ['NEGOCIOS' => $dados];
-        }
-    
-        throw new RuntimeException("Tipo de arquivo não suportado: $tipo");
+        return $retorno;
     }
-    
-        
 }

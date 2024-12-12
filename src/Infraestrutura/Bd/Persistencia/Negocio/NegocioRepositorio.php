@@ -16,7 +16,7 @@ class NegocioRepositorio implements NegocioGateway {
     }
 
     public function salvar(array $negocios): array {
-        $nomeTabela = $negocios[0]->getNomeTabela();
+        $nomeTabela = Negocio::getNomeTabela();
         $tabela = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/negocios-input/config/tabela_negocios.json"), true);
         $colunas = (array)$tabela["colunas"];
         $colunasString = implode(", ", $colunas);
@@ -27,14 +27,19 @@ class NegocioRepositorio implements NegocioGateway {
     
         try {
                 foreach ($negocios as $negocio) {
-                    $id = Uuid::uuid4()->toString();
-                    $ids [] = $id;
+                    $senha = uniqid();
+                    $rastreio [] = [
+                        "id_negocio" => $negocio->getIdnegocio(),
+                        "selo" => $negocio->getId(),
+                        "senha" => $senha,
+                    ];
+                    
                     // Adiciona a linha de placeholders
                     $valores[] = "(" . implode(",", array_fill(0, count($colunas), "?")) . ")";
                     
                     // Adiciona os valores aos parâmetros
                     array_push($parametros, 
-                        $id,
+                        $negocio->getId(),
                         $negocio->getDataRecebimento(),
                         $negocio->getDataAprovacao(),
                         $negocio->getAprovado(),
@@ -61,19 +66,21 @@ class NegocioRepositorio implements NegocioGateway {
                         $negocio->getPesoPercent(),
                         $negocio->getInserido(),
                         $negocio->getAlterado(),
+                        $negocio->getNumeroDalinha(),
+                        $negocio->getArquivo(),
+                        $senha,
                     );
-                   
                 }
             
                 $q .= implode(", ", $valores);
                 $stmt = $this->con->conn()->execute_query( $q, $parametros);
 
-                if ($stmt === false) {
-                    throw new \Exception("Erro ao preparar a query: " . $this->con->conn()->error);
+                if (!$stmt) {
+                    throw new \Exception("Erro inesperado: " . $this->con->conn()->error);
                 }   
             
             $this->con->conn()->close();
-            $result = ["status" => 1, "id" => $ids];
+            $result = ["status" => 1, "id" => $rastreio];
 
             return $result;
         } catch (\Exception $e) {
@@ -81,10 +88,68 @@ class NegocioRepositorio implements NegocioGateway {
             echo "Erro ao executar a query: " . $e->getMessage();
             return [
                 "status" => 0,
-                "id" => $ids
             ];
         }
     }
+
     
+    public function buscar(string $id)  : array {
+        $tabela = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/negocios-input/config/output_tabela_negocios.json"), true);
+        $colunas = (array)$tabela["colunas"];
+        $colunasString = implode(", ", $colunas);
+        $nomeTabela = Negocio::getNomeTabela();
+
+        $q = "SELECT " . $colunasString ." FROM " . $nomeTabela ." where id = ?";
+
+        try {
+            
+            $stmt = $this->con->conn()->execute_query( $q, [$id] );
+            if (!$stmt) {
+                throw new \Exception("Erro inesperado: " . $this->con->conn()->error);
+            } 
+        
+            $objeto = $stmt->fetch_object();
+            
+            if (!$objeto) {
+                $result = ["status"=> 0,"mensagem" => "Objeto nao encontrado"];
+                $this->con->conn()->close();
+            } else {
+                $this->con->conn()->close();
+                $result = ["status" => 1, "negocio" => $objeto];
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+
+            $this->con->conn()->close();
+            echo "Erro ao executar a query: ". $e->getMessage();
+
+            return [
+                "status" => 0,
+            ];
+        }
+    }
+
+    public function buscarSenha(string $senha): bool {
+        $nomeTabela = Negocio::getNomeTabela();
+
+        $q = "SELECT * FROM " . $nomeTabela . " WHERE senha = ?;";
+        try {
+            $stmt = $this->con->conn()->execute_query($q, [$senha]);
+
+            if ($stmt->num_rows === 0) {
+                $this->con->conn()->close();
+                return false;
+            }
+            
+            $this->con->conn()->close();
+            return true;
+        } catch (\Exception $e) {
+            $this->con->conn()->close();
+            echo "". $e->getMessage();
+            return false;
+        }
+    }
     
-}
+} 

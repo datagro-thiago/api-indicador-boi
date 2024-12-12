@@ -6,4 +6,6 @@ use Src\Dominio\Negocio\Negocio;
 
 interface NegocioGateway {
     public function salvar(array $negocios);
+
+    public function buscar(string $id);
 }

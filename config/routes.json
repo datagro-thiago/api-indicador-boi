@@ -6,8 +6,14 @@
     "pacote": "/",
     "controlador": "\\Src\\Infraestrutura\\Web\\Controladores\\ControladorNegocio::upload",
     "metodos": ["POST"]
+  },
+  
+  {
+    "nome": "get",
+    "pacote": "/negocio",
+    "controlador": "\\Src\\Infraestrutura\\Web\\Controladores\\ControladorNegocio::recuperarArquivo",
+    "metodos": ["GET"]
   }
-
 ]
 
 

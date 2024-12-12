@@ -32,7 +32,7 @@ class Municipio {
         $this->slug = $slug;
     }
 
-    public static function carregarMunicipiosDaApi(): void {
+    public static function carregarMunicipiosDaApi(): bool {
         $url = "https://precos.api.datagro.com/basics/municipios.php?aliases=true&";
         $ch = curl_init();
 
@@ -50,6 +50,7 @@ class Municipio {
 
         if (curl_errno($ch)) {
             echo 'Erro cURL: ' . curl_error($ch);
+            return false;
         }
 
         curl_close($ch);
@@ -66,19 +67,30 @@ class Municipio {
                 $item['slug']
             );
         }, $municipios);
+
+        return true;
     }
 
     public static function formatarNome(string $nome): string {
         // Remove tudo após o traço, converte para minúsculas e remove os espaços
         $nomeSemEstado = explode(' - ', $nome)[0]; // Pega tudo antes do traço
         $nomeSemEspacosETraços = str_replace([' ', '-'], '', $nomeSemEstado); // Remove espaços e traços
+        
         return strtolower($nomeSemEspacosETraços); // Retorna em minúsculas
     }
 
     public static function formatarNomeSemEstado(string $nome): string {
-        // Remove tudo após o traço, converte para minúsculas e remove os espaços
-        $nomeSemEstado = explode(' - ', $nome)[0]; // Pega tudo antes do traço
-        return strtolower($nomeSemEstado); // Retorna em minúsculas
+        // Remove tudo após o traço principal, se existir
+        $nomeSemEstado = explode(' - ', $nome)[0]; // Pega tudo antes do traço principal
+        
+        // Remove espaços ao redor de palavras pequenas (1 a 3 caracteres)
+        $nomeSemEspacosExtras = preg_replace('/\s+(\b\w{1,3}\b)\s+/', '$1', $nomeSemEstado);
+        
+        // Remove traços das palavras (ex: "ji-parana" -> "jiparana")
+        $nomeSemTracos = str_replace('-', '', $nomeSemEspacosExtras);
+        
+        // Converte para minúsculas e remove espaços ao redor
+        return strtolower(trim($nomeSemTracos));
     }
 
     public static function buscarPorNome(string $nome): ?self {
@@ -133,4 +145,5 @@ class Municipio {
     public function getSlug(): string {
         return $this->slug;
     }
+    
 }

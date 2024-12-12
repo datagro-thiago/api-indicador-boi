@@ -4,11 +4,11 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0e8ba60fe680f834767469d05f451301
+class ComposerStaticInit4eddc7bbcfa55d69351f85e44abdaa5b
 {
     public static $files = array (
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
@@ -24,10 +24,6 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
     );
 
     public static $prefixLengthsPsr4 = array (
-        'Z' => 
-        array (
-            'ZipStream\\' => 10,
-        ),
         'S' => 
         array (
             'Symfony\\Runtime\\Symfony\\Component\\' => 34,
@@ -60,18 +56,12 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
         ),
         'P' => 
         array (
-            'Psr\\SimpleCache\\' => 16,
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
             'Psr\\EventDispatcher\\' => 20,
             'Psr\\Container\\' => 14,
             'PhpOption\\' => 10,
-            'PhpOffice\\PhpSpreadsheet\\' => 25,
-        ),
-        'M' => 
-        array (
-            'Matrix\\' => 7,
         ),
         'J' => 
         array (
@@ -88,10 +78,6 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
         array (
             'Dotenv\\' => 7,
         ),
-        'C' => 
-        array (
-            'Complex\\' => 8,
-        ),
         'B' => 
         array (
             'Brick\\Math\\' => 11,
@@ -103,10 +89,6 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
     );
 
     public static $prefixDirsPsr4 = array (
-        'ZipStream\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
-        ),
         'Symfony\\Runtime\\Symfony\\Component\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/runtime/Internal',
@@ -203,10 +185,6 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
         array (
             0 => __DIR__ . '/..' . '/ramsey/collection/src',
         ),
-        'Psr\\SimpleCache\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/simple-cache/src',
-        ),
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
@@ -232,14 +210,6 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
         ),
-        'PhpOffice\\PhpSpreadsheet\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
-        ),
-        'Matrix\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
-        ),
         'JmesPath\\' => 
         array (
             0 => __DIR__ . '/..' . '/mtdowling/jmespath.php/src',
@@ -263,10 +233,6 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
         'Dotenv\\' => 
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
-        ),
-        'Complex\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
         ),
         'Brick\\Math\\' => 
         array (
@@ -317,6 +283,7 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
         'Override' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/Override.php',
         'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'SQLite3Exception' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/SQLite3Exception.php',
+        'Shuchkin\\SimpleXLSX' => __DIR__ . '/..' . '/shuchkin/simplexlsx/src/SimpleXLSX.php',
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
@@ -325,9 +292,9 @@ class ComposerStaticInit0e8ba60fe680f834767469d05f451301
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0e8ba60fe680f834767469d05f451301::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0e8ba60fe680f834767469d05f451301::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit0e8ba60fe680f834767469d05f451301::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4eddc7bbcfa55d69351f85e44abdaa5b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4eddc7bbcfa55d69351f85e44abdaa5b::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit4eddc7bbcfa55d69351f85e44abdaa5b::$classMap;
 
         }, null, ClassLoader::class);
     }

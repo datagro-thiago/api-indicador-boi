@@ -6,13 +6,14 @@ use DateTime;
 use Src\Dominio\Utils\DataUtils;
 
 class Negocio {
-    private \DateTime $dataRecebimento;
-    private ?\DateTime $dataAprovacao; // Pode ser NULL
+    private string $id;
+    private DateTime $dataRecebimento;
+    private ?DateTime $dataAprovacao; // Pode ser NULL
     private ?int $aprovado; // Pode ser NULL
     private string $fonte; // ENUM('I', 'AC')
     private int $parte;
     private ?string $idNegocio; // Pode ser NULL
-    private \DateTime $dataNegocio;
+    private DateTime $dataNegocio;
     private ?string $dataAbate; // Pode ser NULL
     private int $quantidade;
     private string $operacao; // Enum('V', 'C')
@@ -20,7 +21,7 @@ class Negocio {
     private ?string $bonus; // CHAR(200), pode ser NULL
     private int $categoria;
     private ?int $raca; // Pode ser NULL
-    private ?int $nutricao; // Pode ser NULL
+    private ?string $nutricao; // Pode ser NULL
     private int $origem;
     private int $destino;
     private ?int $planta; // Pode ser NULL
@@ -28,20 +29,22 @@ class Negocio {
     private ?string $funrural; // Pode ser NULL
     private int $diasPagto;
     private float $valorBase;
-    private string $abatedouro;
     private ?string $pesomodo; // ENUM('V', 'M')
     private ?float $pesopercent; // Pode ser NULL
-    private \DateTime $inserido;
-    private \DateTime $alterado;
+    private ?int $numeroDaLinha;
+    private ?string $arquivo;
+    private DateTime $inserido;
+    private DateTime $alterado;
 
     protected function __construct(
-        \DateTime $dataRecebimento,
-        ?\DateTime $dataAprovacao,
+        string $id,
+        DateTime $dataRecebimento,
+        ?DateTime $dataAprovacao,
         ?int $aprovado,
         string $fonte,
         string $parte,
         ?string $idNegocio,
-        \DateTime $dataNegocio,
+        DateTime $dataNegocio,
         ?string $dataAbate,
         int $quantidade,
         string $operacao,
@@ -49,7 +52,7 @@ class Negocio {
         ?string $bonus,
         int $categoria,
         ?int $raca,
-        ?int $nutricao,
+        ?string $nutricao,
         int $origem,
         int $destino,
         ?int $planta,
@@ -58,8 +61,11 @@ class Negocio {
         int $diasPagto,
         float $valorBase,
         ?string $pesomodo,
-        ?float $pesopercent
+        ?float $pesopercent,
+        string $arquivo,
+        ?int $numeroDaLinha
     ) {
+        $this->id = $id;
         $this->dataRecebimento = $dataRecebimento;
         $this->dataAprovacao = $dataAprovacao;
         $this->aprovado = $aprovado;
@@ -84,19 +90,20 @@ class Negocio {
         $this->valorBase = $valorBase;
         $this->pesomodo = $pesomodo;
         $this->pesopercent = $pesopercent;
-        $this->inserido = new \DateTime();
-        $this->alterado = new \DateTime();
+        $this->numeroDaLinha = $numeroDaLinha;
+        $this->arquivo = $arquivo;
+        $this->inserido = new DateTime();
+        $this->alterado = new DateTime();
     }
 
     public static function novo(
- 
-        ?\DateTime $dataRecebimento,
-        ?\DateTime $dataAprovacao,
+        ?DateTime $dataRecebimento,
+        ?DateTime $dataAprovacao,
         ?int $aprovado,
         string $fonte,
         int $parte,
         ?string $idNegocio,
-        \DateTime $dataNegocio,
+        DateTime $dataNegocio,
         ?string $dataAbate,
         int $quantidade,
         string $operacao,
@@ -104,7 +111,7 @@ class Negocio {
         ?string $bonus,
         int $categoria,
         ?int $raca,
-        ?int $nutricao,
+        ?string $nutricao,
         int $origem,
         int $destino,
         ?int $planta,
@@ -113,9 +120,12 @@ class Negocio {
         int $diasPagto,
         float $valorBase,
         ?string $pesomodo,
-        ?float $pesopercent
+        ?float $pesopercent,
+        ?int $numeroDalinha,
+        string $arquivo,
     ): self {
         return new self(
+            NegocioId::unique(),
             $dataRecebimento,
             $dataAprovacao,
             $aprovado,
@@ -139,11 +149,19 @@ class Negocio {
             $diasPagto,
             $valorBase,
             $pesomodo,
-            $pesopercent
+            $pesopercent,
+            $arquivo,
+            $numeroDalinha,
         );
     }
 
+    public function getId() : string {
+        return $this->id;
+    }
 
+    public function getArquivo(): string {
+        return $this->arquivo;
+    }
     public function getDataRecebimento(): string
     {
         return DataUtils::ConverterParaString($this->dataRecebimento);
@@ -157,7 +175,9 @@ class Negocio {
         return null;
 
     }
-
+    public function getNumeroDalinha(): ?int {
+        return $this->numeroDaLinha;
+    }
     public function getAprovado(): ?int
     {
         return $this->aprovado;
@@ -217,7 +237,7 @@ class Negocio {
         return $this->raca;
     }
 
-    public function getNutricao(): ?int
+    public function getNutricao(): ?string
     {
         return $this->nutricao;
     }
@@ -277,7 +297,7 @@ class Negocio {
         return DataUtils::ConverterParaString($this->alterado);
     }
 
-    public function getNomeTabela(): string {
+    public static function getNomeTabela(): string {
         $nomeTabela = "indicadordoboi.negocios_t";
         
         return $nomeTabela;

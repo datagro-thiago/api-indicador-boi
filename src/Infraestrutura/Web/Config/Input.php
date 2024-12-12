@@ -2,10 +2,11 @@
 
 namespace Src\Infraestrutura\Web\Config;
 
+use Src\Infraestrutura\Web\Servicos\Categoria\ServicoCategoria;
+use Src\Infraestrutura\Web\Servicos\Municipio\Handler\MunicipioHandler;
+
 define('ROTAS',$_SERVER['DOCUMENT_ROOT'] . '/negocios-input/config/routes.json');
 
-use Src\Dominio\Municipio\Municipio;
-use Src\Infraestrutura\Web\Servicos\Categoria\BuscarCategoria;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Route as SymfonyRoute;
@@ -23,9 +24,8 @@ class Input
     {
         $this->rotas = new RouteCollection();
         $this->carregarRotas(ROTAS);
-        Municipio::carregarMunicipiosDaApi();
-        // BuscarCategoria::carregarCategorias();
     }
+
     private function carregarRotas(string $caminho): void{
         $rotas = json_decode(file_get_contents($caminho), true);
 
@@ -37,6 +37,11 @@ class Input
                 $rota['metodos']
             );
         }
+    }
+
+    public function init() {
+        $init = new Init();
+        return $init;
     }
 
     private function definirRotas(
